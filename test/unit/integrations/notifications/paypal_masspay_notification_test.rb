@@ -37,6 +37,12 @@ class PaypalMasspayNotificationTest < Test::Unit::TestCase
     }
   end
   
+  def test_subpayment_transaction_id_mapping
+    @paypal.payments.each_with_index { |payment, i|
+      assert_equal payment.params['masspay_txn_id'], payment.transaction_id
+    }
+  end
+  
   def test_gross_method_sums_all_payments
     assert_equal 4.64, @paypal.gross
   end

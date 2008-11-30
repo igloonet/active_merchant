@@ -10,6 +10,11 @@ module ActiveMerchant #:nodoc:
             params['unique_id']
           end
           
+          # Returns the transaction_id of the given MassPay subpayment
+          def transaction_id
+            params['masspay_txn_id']
+          end
+          
         end
       end
     end
