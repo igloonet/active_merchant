@@ -39,7 +39,7 @@ class PaypalMasspayNotificationTest < Test::Unit::TestCase
   
   def test_subpayment_transaction_id_mapping
     @paypal.payments.each_with_index { |payment, i|
-      assert_equal payment.params['masspay_txn_id'], payment.transaction_id
+      assert_equal "3MH4473235032411#{i.succ}", payment.transaction_id
     }
   end
   
@@ -106,7 +106,7 @@ class PaypalMasspayNotificationTest < Test::Unit::TestCase
   private
 
   def http_raw_data
-    "payer_id=T9KDFTA2QPJJA&payment_date=11%3A28%3A59+Nov+29%2C+2008+PST&payment_gross_1=4.58&payment_gross_2=0.06&payment_status=Completed&receiver_email_1=recipient1%40example.org&receiver_email_2=recipient2%40example.org&charset=windows-1252&mc_currency_1=CAD&masspay_txn_id_1=3MH4473235032411N&mc_currency_2=CAD&masspay_txn_id_2=95713062MK310713Y&first_name=Steven&unique_id_1=uniq1&notify_version=2.6&unique_id_2=uniq2&payer_status=verified&verify_sign=AzdfFzye40fcCzdVqzDsKwQ1s7lkAehzbs3i81m2cH2fRNXqW5f-w1w6&payer_email=paypal%40example.com&payer_business_name=Steven+Luscher%27s+Test+Store&last_name=Luscher&status_1=Completed&status_2=Completed&txn_type=masspay&mc_gross_1=4.58&mc_gross_2=0.06&payment_fee_1=0.09&residence_country=US&payment_fee_2=0.01&test_ipn=1&mc_fee_1=0.09&mc_fee_2=0.01"
+    "payer_id=T9KDFTA2QPJJA&payment_date=11%3A28%3A59+Nov+29%2C+2008+PST&payment_gross_1=4.58&payment_gross_2=0.06&payment_status=Completed&receiver_email_1=recipient1%40example.org&receiver_email_2=recipient2%40example.org&charset=windows-1252&mc_currency_1=CAD&masspay_txn_id_1=3MH44732350324111&mc_currency_2=CAD&masspay_txn_id_2=3MH44732350324112&first_name=Steven&unique_id_1=uniq1&notify_version=2.6&unique_id_2=uniq2&payer_status=verified&verify_sign=AzdfFzye40fcCzdVqzDsKwQ1s7lkAehzbs3i81m2cH2fRNXqW5f-w1w6&payer_email=paypal%40example.com&payer_business_name=Steven+Luscher%27s+Test+Store&last_name=Luscher&status_1=Completed&status_2=Completed&txn_type=masspay&mc_gross_1=4.58&mc_gross_2=0.06&payment_fee_1=0.09&residence_country=US&payment_fee_2=0.01&test_ipn=1&mc_fee_1=0.09&mc_fee_2=0.01"
   end
   
   def non_masspay_http_raw_data

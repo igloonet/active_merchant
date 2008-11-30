@@ -51,7 +51,7 @@ module ActiveMerchant #:nodoc:
 
           # Id of this transaction (paypal number)
           def transaction_id
-            params['txn_id']
+            params['txn_id'] || params['masspay_txn_id']
           end
 
           # the money amount we received in X.2 decimal.
@@ -88,6 +88,11 @@ module ActiveMerchant #:nodoc:
           
           def account
             params['business'] || params['receiver_email']
+          end
+          
+          # Returns the unique_id if this notification represents a MassPay subpayment
+          def unique_id
+            params['unique_id']
           end
           
           

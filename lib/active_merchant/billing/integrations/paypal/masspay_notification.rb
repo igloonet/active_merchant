@@ -1,5 +1,3 @@
-require 'active_merchant/billing/integrations/paypal/masspay_notification_subpayment_methods.rb'
-
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
@@ -97,7 +95,6 @@ module ActiveMerchant #:nodoc:
             
             singleton_class = (class << notification; self end)
             singleton_class.send(:define_method, :acknowledge) { parent_acknowledge.bind(parent_notification).call }
-            singleton_class.send(:include, MasspayNotificationSubpaymentMethods)
           end
           
           def is_payment_specific_param?(key)
