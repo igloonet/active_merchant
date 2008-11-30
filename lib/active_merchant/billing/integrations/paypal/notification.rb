@@ -18,7 +18,7 @@ module ActiveMerchant #:nodoc:
         #         notify = Paypal::Notification.new(request.raw_post)
         #         invoice = Invoice.find(notify.item_id)
         #         receive_invoice_payment(notify, invoice) if notify.acknowledge
-        #       rescue UnsupportedPostDataError # thrown if the raw_post was from a masspay IPN
+        #       rescue Notification::UnsupportedPostDataError # thrown if the raw_post was from a masspay IPN
         #         # Handle MassPay IPN
         #         notify = Paypal::MasspayNotification.new(request.raw_post)
         #         bill_ids = notify.payments.collect{|p| p.unique_id}
