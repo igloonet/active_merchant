@@ -1,5 +1,7 @@
 require 'active_merchant/billing/integrations/paypal/helper.rb'
+require 'active_merchant/billing/integrations/paypal/notification_common.rb'
 require 'active_merchant/billing/integrations/paypal/notification.rb'
+require 'active_merchant/billing/integrations/paypal/masspay_notification.rb'
 require 'active_merchant/billing/integrations/paypal/return.rb'
 
 module ActiveMerchant #:nodoc:
@@ -29,6 +31,10 @@ module ActiveMerchant #:nodoc:
             
         def self.notification(post)
           Notification.new(post)
+        end
+        
+        def self.masspay_notification(post)
+          MasspayNotification.new(post)
         end
         
         def self.return(query_string)

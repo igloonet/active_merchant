@@ -6,6 +6,10 @@ class PaypalModuleTest < Test::Unit::TestCase
   def test_notification_method
     assert_instance_of Paypal::Notification, Paypal.notification('name=cody')
   end
+  
+  def test_masspay_notification_method
+    assert_instance_of Paypal::MasspayNotification, Paypal.masspay_notification('name=steve')
+  end
 
   def test_test_mode
     ActiveMerchant::Billing::Base.integration_mode = :test
