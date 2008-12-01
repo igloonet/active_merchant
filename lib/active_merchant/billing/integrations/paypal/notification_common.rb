@@ -22,8 +22,10 @@ module ActiveMerchant #:nodoc:
           def received_at
             Time.parse params['payment_date']
           end
-
-          # Status of transaction. List of possible values:
+          
+          # Status of transaction.
+          #
+          # List of possible values for single transactions:
           # <tt>Canceled-Reversal</tt>::
           # <tt>Completed</tt>::
           # <tt>Denied</tt>::
@@ -36,8 +38,19 @@ module ActiveMerchant #:nodoc:
           # <tt>Refunded</tt>::
           # <tt>Reversed</tt>::
           # <tt>Voided</tt>::
+          #
+          # List of possible values for MassPay transactions:
+          # <tt>Completed</tt>::
+          # <tt>Denied</tt>::
+          # <tt>Processed</tt>::
+          #
+          # List of possible values for sub-transactions of a MassPay transaction:
+          # <tt>Completed</tt>::
+          # <tt>Failed</tt>::
+          # <tt>Reversed</tt>::
+          # <tt>Unclaimed</tt>::
           def status
-            params['payment_status']
+            params['status'] || params['payment_status']
           end
           
           # What type of transaction are we dealing with?
