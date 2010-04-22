@@ -9,7 +9,7 @@ module ActiveMerchant
       # Add _gateway suffix
       gateway_name = filename + '_gateway'
       # Camelize the string to get the class name
-      gateway_class = gateway_name.camelize      
+      gateway_class = Utils.camelize(gateway_name)
       
       # Register for autoloading
       autoload gateway_class, f      

@@ -182,10 +182,10 @@ module ActiveMerchant #:nodoc:
         root.attributes["StoreID"] = options[:login]
         root.attributes["StoreKey"] = options[:password]
         root.attributes["ApplicationID"] = 'ot 1.0'
-        transaction = root.add_element(action.to_s.camelize)
+        transaction = root.add_element(Utils.camelize(action.to_s))
 
         actions[action].each do |key|
-          transaction.add_element(key.to_s.camelize).text = parameters[key] unless parameters[key].blank?
+          transaction.add_element(Utils.camelize(key.to_s)).text = parameters[key] unless parameters[key].blank?
         end
 
         xml.to_s

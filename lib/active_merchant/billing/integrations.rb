@@ -19,7 +19,7 @@ module ActiveMerchant
         # Get camelized class name 
         filename = File.basename(f, '.rb')
         # Camelize the string to get the class name
-        gateway_class = filename.camelize.to_sym
+        gateway_class = Utils.camelize(filename).to_sym
               
         # Register for autoloading
         autoload gateway_class, f      
