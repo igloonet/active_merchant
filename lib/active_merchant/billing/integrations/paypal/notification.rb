@@ -1,5 +1,3 @@
-require 'net/http'
-
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
@@ -15,74 +13,45 @@ module ActiveMerchant #:nodoc:
         #     include ActiveMerchant::Billing::Integrations
         #
         #     def paypal_ipn
-        #       notify = Paypal::Notification.new(request.raw_post)
-        #   
-        #       order = Order.find(notify.item_id)
-        #     
-        #       if notify.acknowledge 
-        #         begin
-        #           
-        #           if notify.complete? and order.total == notify.amount
-        #             order.status = 'success' 
-        #             
-        #             shop.ship(order)
-        #           else
-        #             logger.error("Failed to verify Paypal's notification, please investigate")
-        #           end
-        #   
-        #         rescue => e
-        #           order.status        = 'failed'      
-        #           raise
-        #         ensure
-        #           order.save
-        #         end
+        #       begin
+        #         # Handle regular IPN
+        #         notify = Paypal::Notification.new(request.raw_post)
+        #         invoice = Invoice.find(notify.item_id)
+        #         receive_invoice_payment(notify, invoice) if notify.acknowledge
+        #       rescue Notification::UnsupportedPostDataError # thrown if the raw_post was from a masspay IPN
+        #         # Handle MassPay IPN
+        #         notify = Paypal::MasspayNotification.new(request.raw_post)
+        #         bill_ids = notify.payments.collect{|p| p.unique_id}
+        #         bills = Bill.find_all_by_id(bill_ids)
+        #         make_bill_payments(notify, bills) if notify.acknowledge
         #       end
-        #   
+        #     
         #       render :nothing
         #     end
+        #
+        #     def receive_invoice_payment(notify, invoice)
+        #       if notify.complete? and invoice.total == notify.amount
+        #         invoice.update_attribute(:status, 'paid')
+        #       else
+        #         # raise invoice payment errors
+        #       end
+        #     end
+        #
+        #     def make_bill_payments(notify, bills)
+        #       if notify.complete? and bills.inject(0){|sum, b| sum + b.total} == notify.amount
+        #         bills.each {|b| b.update_attribute(:status, 'paid') }
+        #       else
+        #         # raise bill payment errors
+        #       end
+        #     end
+        #   
         #   end
         class Notification < ActiveMerchant::Billing::Integrations::Notification
-          include PostsData
-          
-          # Was the transaction complete?
-          def complete?
-            status == "Completed"
-          end
-
-          # When was this payment received by the client. 
-          # sometimes it can happen that we get the notification much later. 
-          # One possible scenario is that our web application was down. In this case paypal tries several 
-          # times an hour to inform us about the notification
-          def received_at
-            Time.parse params['payment_date']
-          end
-
-          # Status of transaction. List of possible values:
-          # <tt>Canceled-Reversal</tt>::
-          # <tt>Completed</tt>::
-          # <tt>Denied</tt>::
-          # <tt>Expired</tt>::
-          # <tt>Failed</tt>::
-          # <tt>In-Progress</tt>::
-          # <tt>Partially-Refunded</tt>::
-          # <tt>Pending</tt>::
-          # <tt>Processed</tt>::
-          # <tt>Refunded</tt>::
-          # <tt>Reversed</tt>::
-          # <tt>Voided</tt>::
-          def status
-            params['payment_status']
-          end
+          include NotificationCommonMethods
 
           # Id of this transaction (paypal number)
           def transaction_id
-            params['txn_id']
-          end
-
-          # What type of transaction are we dealing with? 
-          #  "cart" "send_money" "web_accept" are possible here. 
-          def type
-            params['txn_type']
+            params['txn_id'] || params['masspay_txn_id']
           end
 
           # the money amount we received in X.2 decimal.
@@ -93,6 +62,11 @@ module ActiveMerchant #:nodoc:
           # the markup paypal charges for the transaction
           def fee
             params['mc_fee']
+          end
+          
+          # the markup paypal charges for the transaction, in cents
+          def fee_cents
+            (fee.to_f * 100.0).round
           end
 
           # What currency have we been dealing with
@@ -111,41 +85,21 @@ module ActiveMerchant #:nodoc:
           def invoice
             params['invoice']
           end   
-
-          # Was this a test transaction?
-          def test?
-            params['test_ipn'] == '1'
-          end
           
           def account
             params['business'] || params['receiver_email']
           end
-
-          # Acknowledge the transaction to paypal. This method has to be called after a new 
-          # ipn arrives. Paypal will verify that all the information we received are correct and will return a 
-          # ok or a fail. 
-          # 
-          # Example:
-          # 
-          #   def paypal_ipn
-          #     notify = PaypalNotification.new(request.raw_post)
-          #
-          #     if notify.acknowledge 
-          #       ... process order ... if notify.complete?
-          #     else
-          #       ... log possible hacking attempt ...
-          #     end
-          def acknowledge
-            payload =  raw
-
-            response = ssl_post(Paypal.service_url + '?cmd=_notify-validate', payload, 
-              'Content-Length' => "#{payload.size}",
-              'User-Agent'     => "Active Merchant -- http://activemerchant.org"
-            )
-            
-            raise StandardError.new("Faulty paypal result: #{response}") unless ["VERIFIED", "INVALID"].include?(response)
-
-            response == "VERIFIED"
+          
+          # Returns the unique_id if this notification represents a MassPay subpayment
+          def unique_id
+            params['unique_id']
+          end
+          
+          
+          private
+          
+          def validate_ipn_type
+            raise UnsupportedPostDataError.new("This class does not support IPNs of txn_type \"masspay\". Please instantiate a Paypal::MasspayNotification instead.") if !type.nil? and type.downcase.to_sym == :masspay
           end
         end
       end

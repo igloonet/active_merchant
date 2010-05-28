@@ -2,6 +2,9 @@ module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
       class Notification
+        
+        class UnsupportedPostDataError < StandardError; end
+        
         attr_accessor :params
         attr_accessor :raw
         
