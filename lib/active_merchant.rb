@@ -23,10 +23,14 @@
                     
 $:.unshift File.dirname(__FILE__)
 
-require 'active_support'
 require 'builder'
 require 'cgi'
 require 'rexml/document'
+
+# ruby extensions
+require 'active_merchant/ruby_ext/extract_options'
+require 'active_merchant/ruby_ext/module'
+require 'active_merchant/ruby_ext/class'
 
 require 'active_merchant/lib/utils'
 require 'active_merchant/lib/error'

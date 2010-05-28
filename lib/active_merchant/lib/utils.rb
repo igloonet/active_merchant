@@ -13,6 +13,12 @@ module ActiveMerchant #:nodoc:
       md5.hexdigest
     end
     
-    module_function :generate_unique_id
+    module_function :generate_unique_id    
+    
+    # convert string to camel case
+    def self.camelize(lower_case_and_underscored_word, first_letter_in_uppercase = true)
+      lower_case_and_underscored_word.to_s.gsub(/\/(.?)/) { "::#{$1.upcase}" }.gsub(/(?:^|_)(.)/) { $1.upcase }
+    end
+    
   end
 end
